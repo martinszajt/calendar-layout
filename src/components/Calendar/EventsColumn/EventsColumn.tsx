@@ -1,34 +1,28 @@
-import {
-  getCalendarHeight,
-  getCalendarWidth,
-  getTimeLabelWidth,
-} from "../../../constants/constants";
 import { IPositionedEvent } from "../../../interfaces/event.interface";
 import EventCard from "./EventCard/EventCard";
 
 const EventsColumn = ({
   positionedEvents,
+  totalColumns,
 }: {
   positionedEvents: IPositionedEvent[];
+  totalColumns: number;
 }) => {
   return (
-    <div
-      className="relative"
-      style={{
-        width: getCalendarWidth() - getTimeLabelWidth(),
-        height: getCalendarHeight(),
-      }}
-    >
-      {positionedEvents.length === 0 && (
-        <p className="text-center text-gray-500 mt-4">No events scheduled.</p>
-      )}
-      {positionedEvents.map((event, index) => (
-        <EventCard
-          event={event}
-          cardIndex={index}
-          key={event.start + event.end}
-        />
-      ))}
+    <div className="w-full bg-[#ececec] border-l border-l-[#d6d6d6] px-4">
+      <div className="relative w-full h-full">
+        {positionedEvents.length === 0 && (
+          <p className="text-center mt-4">No events scheduled.</p>
+        )}
+        {positionedEvents.map((event, index) => (
+          <EventCard
+            event={event}
+            cardIndex={index}
+            key={index}
+            totalColumns={totalColumns}
+          />
+        ))}
+      </div>
     </div>
   );
 };

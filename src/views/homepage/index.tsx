@@ -1,22 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   ICalendarEvent,
   IPositionedEvent,
 } from "../../interfaces/event.interface";
 import useGlobalStore from "../../store/useGlobalStore";
 import Calendar from "../../components/Calendar/Calendar";
-import {
-  getCalendarWidth,
-  getMinuteToPX,
-  getTimeLabelWidth,
-} from "../../constants/constants";
+import { getMinuteToPX } from "../../constants/constants";
 
-// Check if two events overlap in time
 function eventsOverlap(eventA: ICalendarEvent, eventB: ICalendarEvent) {
   return eventA.start < eventB.end && eventB.start < eventA.end;
 }
 
-// Group events by overlapping time
 function groupOverlappingEvents(events: ICalendarEvent[]) {
   const groups: ICalendarEvent[][] = [];
 
@@ -28,65 +22,11 @@ function groupOverlappingEvents(events: ICalendarEvent[]) {
     if (groupIndex === -1) {
       groups.push([event]);
     } else {
-      groups[groupIndex]!.push(event); // add `!` here
+      groups[groupIndex]!.push(event);
     }
   });
 
   return groups;
-}
-
-// Assign events in a group to columns so no events in the same column overlap
-function assignColumnsToGroup(group: ICalendarEvent[]) {
-  const columns: ICalendarEvent[][] = [];
-
-  group.forEach((event) => {
-    const colIndex = columns.findIndex(
-      (column) =>
-        !column.some((existingEvent) => eventsOverlap(existingEvent, event)),
-    );
-
-    if (colIndex === -1) {
-      columns.push([event]);
-    } else {
-      columns[colIndex]!.push(event); // add non-null assertion here
-    }
-  });
-
-  return columns;
-}
-
-// Calculate event positions for rendering
-function calculateEventPositions(events: ICalendarEvent[]): IPositionedEvent[] {
-  if (events.length === 0) return [];
-
-  // Sort be start time
-  const sortedEvents = [...events].sort((a, b) => a.start - b.start);
-
-  // Create columns for overlapping events
-  const groups = groupOverlappingEvents(sortedEvents);
-
-  const positionedEvents: IPositionedEvent[] = [];
-
-  // Set position for each event
-  groups.forEach((group) => {
-    const columns = assignColumnsToGroup(group);
-    const totalColumns = columns.length;
-    const eventWidth =
-      (getCalendarWidth() - getTimeLabelWidth()) / totalColumns;
-
-    group.forEach((event) => {
-      const colIndex = columns.findIndex((column) => column.includes(event));
-      positionedEvents.push({
-        ...event,
-        top: event.start * getMinuteToPX(),
-        height: (event.end - event.start) * getMinuteToPX(),
-        left: colIndex * eventWidth,
-        width: eventWidth,
-      });
-    });
-  });
-
-  return positionedEvents;
 }
 
 const HomepageView = () => {
@@ -94,12 +34,60 @@ const HomepageView = () => {
   const [positionedEvents, setPositionedEvents] = useState<IPositionedEvent[]>(
     [],
   );
+  const [totalColumns, setTotalColumns] = useState<number>(0);
 
-  useEffect(() => {
-    setPositionedEvents(calculateEventPositions(calendarEvents));
+  function assignColumnsToGroup(group: ICalendarEvent[]) {
+    const columns: ICalendarEvent[][] = [];
+
+    group.forEach((event) => {
+      const colIndex = columns.findIndex(
+        (column) =>
+          !column.some((existingEvent) => eventsOverlap(existingEvent, event)),
+      );
+
+      if (colIndex === -1) {
+        columns.push([event]);
+      } else {
+        columns[colIndex]!.push(event);
+      }
+    });
+
+    setTotalColumns(columns.length);
+
+    return columns;
+  }
+
+  const calculateEventPositions = useCallback(() => {
+    const sortedEvents = [...calendarEvents].sort((a, b) => a.start - b.start);
+
+    const groups = groupOverlappingEvents(sortedEvents);
+
+    const positionedEventsList: IPositionedEvent[] = [];
+
+    groups.forEach((group) => {
+      const columns = assignColumnsToGroup(group);
+
+      group.forEach((event) => {
+        const colIndex = columns.findIndex((column) => column.includes(event));
+        positionedEventsList.push({
+          ...event,
+          top: event.start * getMinuteToPX(),
+          height: (event.end - event.start) * getMinuteToPX(),
+          colIndex,
+        });
+      });
+    });
+
+    setPositionedEvents(positionedEventsList);
   }, [calendarEvents]);
 
-  return <Calendar positionedEvents={positionedEvents} />;
+  useEffect(() => {
+    calculateEventPositions();
+  }, [calculateEventPositions]);
+
+  return (
+    <Calendar positionedEvents={positionedEvents} totalColumns={totalColumns} />
+  );
 };
 
 export default HomepageView;

@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { ICalendarEvent } from "../interfaces/event.interface";
+import initialEvents from "./initialEvents";
 
 interface State {
   calendarEvents: ICalendarEvent[];
@@ -8,18 +8,13 @@ interface State {
 }
 
 const initialState = {
-  calendarEvents: [],
+  calendarEvents: initialEvents,
 };
-const useGlobalStore = create<State>()(
-  persist(
-    (set) => ({
-      calendarEvents: initialState.calendarEvents,
-      setCalendarEvents: (events: ICalendarEvent[]) => {
-        set({ calendarEvents: events });
-      },
-    }),
-    { name: "calendar-storage" },
-  ),
-);
+const useGlobalStore = create<State>()((set) => ({
+  calendarEvents: initialState.calendarEvents,
+  setCalendarEvents: (events: ICalendarEvent[]) => {
+    set({ calendarEvents: events });
+  },
+}));
 
 export default useGlobalStore;

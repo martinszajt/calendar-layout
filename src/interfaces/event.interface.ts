@@ -6,6 +6,5 @@ export interface ICalendarEvent {
 export interface IPositionedEvent extends ICalendarEvent {
   top: number;
   height: number;
-  left: number;
-  width: number;
+  colIndex: number;
 }
