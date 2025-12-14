@@ -1,4 +1,4 @@
-import { CALENDAR_HEIGHT, CALENDAR_WIDTH } from "../../constants/constants";
+import { getCalendarHeight, getCalendarWidth } from "../../constants/constants";
 import { IPositionedEvent } from "../../interfaces/event.interface";
 import EventsColumn from "./EventsColumn/EventsColumn";
 import ReferenceColumn from "./RefenceColumn/ReferenceColumn";
@@ -10,8 +10,8 @@ const Calendar = ({
 }) => {
   return (
     <div
-      className="relative border border-gray-300 mx-auto mt-8 bg-white rounded flex"
-      style={{ width: CALENDAR_WIDTH, height: CALENDAR_HEIGHT }}
+      className="relative border-none mx-auto mt-8 bg-red rounded flex overflow-scroll py-4"
+      style={{ width: getCalendarWidth(), height: getCalendarHeight() }}
     >
       <ReferenceColumn />
 

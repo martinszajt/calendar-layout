@@ -1,7 +1,7 @@
 import {
-  CALENDAR_WIDTH,
-  TIME_LABEL_WIDTH,
-  CALENDAR_HEIGHT,
+  getCalendarHeight,
+  getCalendarWidth,
+  getTimeLabelWidth,
 } from "../../../constants/constants";
 import { IPositionedEvent } from "../../../interfaces/event.interface";
 import EventCard from "./EventCard/EventCard";
@@ -15,8 +15,8 @@ const EventsColumn = ({
     <div
       className="relative"
       style={{
-        width: CALENDAR_WIDTH - TIME_LABEL_WIDTH,
-        height: CALENDAR_HEIGHT,
+        width: getCalendarWidth() - getTimeLabelWidth(),
+        height: getCalendarHeight(),
       }}
     >
       {positionedEvents.length === 0 && (

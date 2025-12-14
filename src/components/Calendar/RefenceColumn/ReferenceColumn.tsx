@@ -1,7 +1,7 @@
 import {
-  CALENDAR_HEIGHT,
-  MINUTE_TO_PX,
-  TIME_LABEL_WIDTH,
+  getCalendarHeight,
+  getMinuteToPX,
+  getTimeLabelWidth,
 } from "../../../constants/constants";
 
 const timeLabels: any = [];
@@ -12,7 +12,10 @@ for (let i = 9; i <= 21; i++) {
     <div
       key={i}
       className="absolute text-gray-500 text-xs"
-      style={{ top: (i - 9) * 60 * MINUTE_TO_PX - 6, width: TIME_LABEL_WIDTH }}
+      style={{
+        top: (i - 9) * 60 * getMinuteToPX() - 6,
+        width: getTimeLabelWidth(),
+      }}
     >
       {displayHour}:00 {ampm}
     </div>,
@@ -22,8 +25,8 @@ for (let i = 9; i <= 21; i++) {
 const ReferenceColumn = () => {
   return (
     <div
-      className="relative border-r border-gray-300 text-right pr-2 select-none"
-      style={{ width: TIME_LABEL_WIDTH, height: CALENDAR_HEIGHT }}
+      className="relative border-r border-none text-right pr-2 select-none"
+      style={{ width: getTimeLabelWidth(), height: getCalendarHeight() }}
     >
       {timeLabels}
     </div>
