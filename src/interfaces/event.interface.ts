@@ -1,4 +1,4 @@
-export interface CalendarEvent {
+export interface ICalendarEvent {
   start: number;
   end: number;
 }
