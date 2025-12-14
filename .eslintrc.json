@@ -25,7 +25,8 @@
         "selector": "enum",
         "format": ["UPPER_CASE"]
       }
-    ]
-
+    ],
+    "no-plusplus": "off",
+    "@typescript-eslint/no-explicit-any": "off"
   }
 }
