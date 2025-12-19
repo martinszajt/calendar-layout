@@ -4,11 +4,9 @@ import { IPositionedEvent } from "../../../../interfaces/event.interface";
 const EventCard = ({
   event,
   cardIndex,
-  totalColumns,
 }: {
   event: IPositionedEvent & { colIndex: number };
   cardIndex: number;
-  totalColumns: number;
 }) => {
   return (
     <div
@@ -22,8 +20,8 @@ const EventCard = ({
       style={{
         top: event.top,
         height: event.height,
-        width: `calc(100% / ${totalColumns})`,
-        left: `calc(${(event.colIndex / totalColumns) * 100}%)`,
+        width: event.width,
+        left: event.left,
       }}
       title={`Sample Item`}
     >

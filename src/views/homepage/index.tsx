@@ -11,83 +11,97 @@ function eventsOverlap(eventA: ICalendarEvent, eventB: ICalendarEvent) {
   return eventA.start < eventB.end && eventB.start < eventA.end;
 }
 
-function groupOverlappingEvents(events: ICalendarEvent[]) {
-  const groups: ICalendarEvent[][] = [];
+function getOverlappingEvents(event: ICalendarEvent, events: ICalendarEvent[]) {
+  return events.filter((e) => e !== event && eventsOverlap(e, event));
+}
 
-  events.forEach((event) => {
-    const groupIndex = groups.findIndex((group) =>
-      group.some((existingEvent) => eventsOverlap(existingEvent, event)),
-    );
+function getColumnIndex(event: ICalendarEvent, overlapping: ICalendarEvent[]) {
+  const columns: ICalendarEvent[][] = [];
+  let eventColIndex = 0;
 
-    if (groupIndex === -1) {
-      groups.push([event]);
-    } else {
-      groups[groupIndex]!.push(event);
-    }
-  });
+  overlapping
+    .concat(event)
+    .sort((a, b) => a.start - b.start)
+    .forEach((ev) => {
+      const colIndex = columns.findIndex(
+        (column) => !column.some((existing) => eventsOverlap(existing, ev)),
+      );
 
-  return groups;
+      if (colIndex === -1) {
+        columns.push([ev]);
+
+        if (ev === event) {
+          eventColIndex = columns.length - 1;
+        }
+      } else {
+        const column = columns[colIndex] || [];
+        column.push(ev);
+
+        if (ev === event) {
+          eventColIndex = colIndex;
+        }
+      }
+    });
+
+  return {
+    colIndex: eventColIndex,
+    totalColumns: columns.length,
+  };
 }
 
 const HomepageView = () => {
   const { calendarEvents } = useGlobalStore();
+
   const [positionedEvents, setPositionedEvents] = useState<IPositionedEvent[]>(
     [],
   );
-  const [totalColumns, setTotalColumns] = useState<number>(0);
-
-  function assignColumnsToGroup(group: ICalendarEvent[]) {
-    const columns: ICalendarEvent[][] = [];
-
-    group.forEach((event) => {
-      const colIndex = columns.findIndex(
-        (column) =>
-          !column.some((existingEvent) => eventsOverlap(existingEvent, event)),
-      );
-
-      if (colIndex === -1) {
-        columns.push([event]);
-      } else {
-        columns[colIndex]!.push(event);
-      }
-    });
-
-    setTotalColumns(columns.length);
-
-    return columns;
-  }
 
   const calculateEventPositions = useCallback(() => {
     const sortedEvents = [...calendarEvents].sort((a, b) => a.start - b.start);
 
-    const groups = groupOverlappingEvents(sortedEvents);
+    const positioned: IPositionedEvent[] = [];
 
-    const positionedEventsList: IPositionedEvent[] = [];
+    sortedEvents.forEach((event) => {
+      const overlapping = getOverlappingEvents(event, sortedEvents);
 
-    groups.forEach((group) => {
-      const columns = assignColumnsToGroup(group);
+      const top = event.start * getMinuteToPX();
+      const height = (event.end - event.start) * getMinuteToPX();
 
-      group.forEach((event) => {
-        const colIndex = columns.findIndex((column) => column.includes(event));
-        positionedEventsList.push({
+      if (overlapping.length === 0) {
+        positioned.push({
           ...event,
-          top: event.start * getMinuteToPX(),
-          height: (event.end - event.start) * getMinuteToPX(),
-          colIndex,
+          top,
+          height,
+          colIndex: 0,
+          width: "100%",
+          left: "0%",
         });
+        return;
+      }
+
+      const { colIndex, totalColumns } = getColumnIndex(event, overlapping);
+
+      const width = 100 / totalColumns;
+      const left = colIndex * width;
+
+      positioned.push({
+        ...event,
+        top,
+        height,
+        colIndex,
+        width: `${width}%`,
+        left: `${left}%`,
       });
     });
 
-    setPositionedEvents(positionedEventsList);
+    setPositionedEvents(positioned);
   }, [calendarEvents]);
 
   useEffect(() => {
     calculateEventPositions();
   }, [calculateEventPositions]);
 
-  return (
-    <Calendar positionedEvents={positionedEvents} totalColumns={totalColumns} />
-  );
+  return <Calendar positionedEvents={positionedEvents} />;
 };
 
 export default HomepageView;

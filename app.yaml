@@ -1,0 +1,5 @@
+name: calendar-layout
+app_id: da_KgYIZt9UZv8a
+owner: martinszajt
+package: .
+kind: wasmer.io/App.v0

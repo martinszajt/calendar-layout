@@ -5,10 +5,8 @@ import ReferenceColumn from "./RefenceColumn/ReferenceColumn";
 
 const Calendar = ({
   positionedEvents,
-  totalColumns,
 }: {
   positionedEvents: IPositionedEvent[];
-  totalColumns: number;
 }) => {
   return (
     <div
@@ -17,10 +15,7 @@ const Calendar = ({
     >
       <ReferenceColumn />
 
-      <EventsColumn
-        positionedEvents={positionedEvents}
-        totalColumns={totalColumns}
-      />
+      <EventsColumn positionedEvents={positionedEvents} />
     </div>
   );
 };
